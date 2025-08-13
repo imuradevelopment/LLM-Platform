@@ -1,0 +1,17 @@
+.env
+.env.*
+!.env.example
+node_modules/
+dist/
+build/
+*.log
+.DS_Store
+coverage/
+.cache/
+data/
+.pnpm-store/
+
+# Always generate migrations locally; do not commit SQL
+db/migrations/*.sql
+!db/migrations/.gitkeep
+

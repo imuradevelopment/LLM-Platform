@@ -1,0 +1,80 @@
+// Root project definition intentionally omitted for CLI compatibility
+
+Table users {
+  id integer [pk, increment]
+  name text [unique]
+  password_hash text
+  created_at datetime [default: `CURRENT_TIMESTAMP`]
+}
+
+Table chats {
+  id integer [pk, increment]
+  user_id integer [ref: > users.id]
+  title text
+  summary text
+  created_at datetime [default: `CURRENT_TIMESTAMP`]
+  updated_at datetime [default: `CURRENT_TIMESTAMP`]
+
+  indexes {
+    (user_id) [name: 'idx_chats_user_id']
+  }
+}
+
+Table messages {
+  id integer [pk, increment]
+  chat_id integer [ref: > chats.id]
+  role text
+  content text
+  meta jsonb
+  created_at datetime [default: `CURRENT_TIMESTAMP`]
+
+  indexes {
+    (chat_id) [name: 'idx_messages_chat_id']
+  }
+}
+
+Table documents {
+  id integer [pk, increment]
+  user_id integer [ref: > users.id]
+  title text
+  source text
+  created_at datetime [default: `CURRENT_TIMESTAMP`]
+  updated_at datetime [default: `CURRENT_TIMESTAMP`]
+
+  indexes {
+    (user_id) [name: 'idx_documents_user_id']
+  }
+}
+
+Table doc_chunks {
+  id integer [pk, increment]
+  document_id integer [ref: > documents.id]
+  idx integer
+  content text
+  created_at datetime [default: `CURRENT_TIMESTAMP`]
+
+  indexes {
+    (document_id) [name: 'idx_doc_chunks_document_id']
+  }
+}
+
+Table doc_embeddings {
+  id integer [pk, increment]
+  chunk_id integer [ref: > doc_chunks.id]
+  provider text
+  model text
+  dims integer
+  embedding jsonb
+  created_at datetime [default: `CURRENT_TIMESTAMP`]
+
+  indexes {
+    (chunk_id) [name: 'idx_doc_embeddings_chunk_id']
+    (provider, model) [name: 'idx_doc_embeddings_provider_model']
+  }
+}
+
+// Foreign keys are defined inline above.
+
+
+
+

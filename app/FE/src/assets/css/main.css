@@ -1,0 +1,54 @@
+:root {
+  --c-bg: #0f172a;            /* slate-900 */
+  --c-panel: #111827;         /* gray-900 */
+  --c-border: #1f2937;        /* gray-800 */
+  --c-btn: #1f2937;           /* soft button surface */
+  --c-input: #111827;         /* input surface */
+  --c-fg: #e5e7eb;            /* gray-200 */
+  --c-fg-muted: #9ca3af;      /* gray-400 */
+  --c-fg-strong: #ffffff;     /* strong text on accent */
+  --c-accent: #4f46e5;        /* indigo-600 */
+  --c-hover: #374151;         /* gray-700 */
+  --c-active: #1f2937;        /* active item bg */
+  /* chat bubbles */
+  --c-bubble-user: #1f2937;       /* gray-800 */
+  --c-bubble-assistant: #111827;  /* gray-900 */
+  --c-bubble-border: #334155;     /* slate-700 */
+}
+
+html, body, #__nuxt { height: 100%; }
+html, body { background: var(--c-bg); color: var(--c-fg); }
+* { box-sizing: border-box; }
+
+a { color: var(--c-fg); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+button, input, select, textarea {
+  background: var(--c-input);
+  color: var(--c-fg);
+  border: 1px solid var(--c-border);
+}
+button {
+  background: var(--c-btn);
+  cursor: pointer;
+}
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+select, input, textarea { border-radius: 6px; }
+
+/* minimal utilities used in templates */
+.border { border: 1px solid var(--c-border); }
+.rounded { border-radius: 6px; }
+.p-2 { padding: .5rem; }
+.p-4 { padding: 1rem; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+.space-y-3 > * + * { margin-top: .75rem; }
+.flex { display: flex; }
+.gap-2 { gap: .5rem; }
+.text-xl { font-size: 1.25rem; }
+.font-semibold { font-weight: 600; }
+.text-sm { font-size: .875rem; }
+
+

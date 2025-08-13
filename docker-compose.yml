@@ -1,0 +1,7 @@
+name: chatmvp
+
+include:
+  - ./app/BE/docker-compose.yml
+  - ./app/FE/docker-compose.yml
+
+
