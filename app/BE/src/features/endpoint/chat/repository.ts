@@ -103,6 +103,19 @@ export async function deleteChat(chatId: number, userId: number): Promise<boolea
   return (result.rowCount ?? 0) > 0;
 }
 
+export async function getChatSummary(chatId: number, userId: number): Promise<string | null> {
+  const pool = getPgPool();
+  const { rows } = await pool.query('SELECT summary FROM chats WHERE id = $1 AND user_id = $2 LIMIT 1', [chatId, userId]);
+  if (!rows.length) return null;
+  const value = rows[0]?.summary;
+  return typeof value === 'string' ? value : (value == null ? null : String(value));
+}
+
+export async function setChatSummary(chatId: number, userId: number, summary: string): Promise<boolean> {
+  const pool = getPgPool();
+  const result = await pool.query('UPDATE chats SET summary = $1 WHERE id = $2 AND user_id = $3', [summary, chatId, userId]);
+  return (result.rowCount ?? 0) > 0;
+}
 
 
 

@@ -6,6 +6,7 @@ import { TITLE_INSTRUCTION } from './prompts';
 import { debugLog } from '../../shared/logger';
 import { buildMessages, type ChatMessage } from './build-messages';
 import { computeMaxOutputTokens, estimatePromptTokens, getContextWindow, normalizeGenParams } from './provider-hub';
+import { prepareModelInputAsync } from './middle-layer';
 
 export type Role = 'system' | 'user' | 'assistant';
 
@@ -28,9 +29,16 @@ export async function streamText(
 ): Promise<StreamTextResult> {
   const model: LanguageModelV1 = getLanguageModel({ provider: env?.provider as any, model: env?.model, extra: env?.extra });
 
-  // Simple approach: use all messages without middle layer processing
+  // Middle layer: apply short-term trimming + inject summary/RAG if available
+  const context = {
+    chatId: (() => { try { return Number(env?.extra?.chatId || '') || null; } catch { return null; } })(),
+    userId: (() => { try { return Number(env?.extra?.userId || '') || null; } catch { return null; } })(),
+  } as const;
+  const prepared = await prepareModelInputAsync({ messages, provider: env?.provider, modelId: env?.model, context });
+
+  // Vercel AI SDK に合わせる
   const addTitle = Boolean(env?.includeTitleInstruction);
-  const base: CoreMessage[] = buildMessages(messages, {});
+  const base: CoreMessage[] = buildMessages(prepared.messages, prepared.buildOptions);
   const vercelMessages: CoreMessage[] = addTitle
     ? ([{ role: 'system' as any, content: TITLE_INSTRUCTION }, ...base])
     : base;

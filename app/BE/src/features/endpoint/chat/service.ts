@@ -6,6 +6,7 @@ import { MAX_RESPONSE_SEGMENTS, MAX_TOKENS } from '../../llm/constants';
 import { sseToPlainTextTransform } from '../../../shared/streaming/sseToPlainText';
 import { createChatIfNotExists, insertMessage, setTitleIfEmpty, getMessagesByChat } from './repository';
 import { debugLog, debugError } from '../../../shared/logger';
+import { updateRunningSummary } from '../../llm/summary';
 
 export async function chatService(
   body: ChatBody,
@@ -40,8 +41,8 @@ export async function chatService(
   messages = rows.map((r) => ({ role: r.role, content: r.content })) as typeof messages;
   debugLog('chatService: authoritative messages loaded', { effectiveChatId, messagesCount: messages.length });
 
-  // Simple approach: send all messages without trimming or middle layer processing
-  debugLog('chatService: messages prepared (full history)', { effectiveChatId, messagesCount: messages.length });
+  // ここではプリトリムは行わない。中間層（features/llm/middle-layer）で最小限の調整を行う。
+  debugLog('chatService: messages prepared (no pre-trim here)', { effectiveChatId, messagesCount: messages.length });
 
   const stream = new SwitchableStream();
 
@@ -112,7 +113,22 @@ export async function chatService(
             return; // close は switch 後に自動
           }
 
-          // Summary functionality removed - using simple full conversation history approach
+          // ランニング要約を非同期で更新（失敗してもチャットは継続）
+          try {
+            const lastUser = messages.filter((m) => m.role === 'user').slice(-1)[0]?.content || '';
+            const lastAssistant = assistantText;
+            // ユーザーIDはnumberに限定されるエンドポイントなので安全にNumber()
+            await updateRunningSummary({
+              chatId: effectiveChatId,
+              userId: Number(userId),
+              provider: (provider as any) || undefined,
+              model: model || undefined,
+              lastUserContent: lastUser,
+              lastAssistantContent: lastAssistant,
+            });
+          } catch (e) {
+            debugError('chatService: summary update failed (non-fatal)', e);
+          }
         } finally {
           debugLog('chatService: closing stream');
           // フォールバックで closeOnDone を使った場合はここで閉じない
